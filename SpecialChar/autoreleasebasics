@@ -1,0 +1,108 @@
+    /* basics of autoreleasepool */
+    /* the 'autoreleasepool({' starts an autoreleasepool, the '})' ends it */
+    autoreleasepool({
+        /* a holder holds a slot of memory, 4 bytes, similar to a pointer */
+        holder myAge;
+        
+        /* a 'Number' is a typedef */
+        
+        /* defN defines a number and returns the memory slot */
+        myAge = defN(12);
+        
+        /* getN returns the Number (a.k.a. double) within the memory slot */
+        printf("\n%f\n",getN(myAge));
+        
+        /* the function 'addNumberToMainStack' adds memory to the main stack and returns the memory slot, usually the return value is ignored. Most of the time 'defN' is used if you want a reurn value */
+        addNumberToMainStack(13);
+        
+        /* when 'addNumberToMainStack' gets called, the number is placed in the memory slot after the last one */
+        
+        /* if you bump a holder's memory slot up one, it goes onto the next value in the main stack */
+        myAge++;
+        printf("\n%f\n",getN(myAge));
+        
+        /* the function 'printMainStack' prints all of the main stack, as well as the ammount of numbers in it and the ammount of bytes it takes up */
+        printMainStack();
+        
+        /* you can set the memory of an existing holder by using the 'setN' function */
+        setN(myAge, 21);
+        
+        /* it does not change the old memory, but it adds new memory and puts the holder at that spot */
+        /* if you print the stack, you can see that the old value is still there, however the new value is at the end */
+        printMainStack();
+        
+        printf("\n%f\n",getN(myAge));
+        
+    })
+    
+    /* declaring a string */  /* the autoreleasepool clears out to make way for some new memory */
+    autoreleasepool({
+        /* -124 identifies that it is a string */
+        holder myName1 = defN(-124);
+        
+        /* the next number specifies the length */
+        addNumberToMainStack(5);
+        
+        /* the following chars added represent the letters */
+        addNumberToMainStack('A');
+        addNumberToMainStack('a');
+        addNumberToMainStack('r');
+        addNumberToMainStack('o');
+        addNumberToMainStack('n');
+        
+        /* the following statement does all of the above. defS defines a string and returns the memory slot */
+        holder myName2 = defS("Aaron");
+        
+        /* printing myName1 and myName2 print the exact same result, although they are stored in different parts of the main stack */
+        printf("\n %s %s \n",getS(myName1),getS(myName2));
+        
+        /* the chars are printed out */
+        printMainStack();
+        
+        /* you can set a string by using the 'setS' function */
+        
+        /* to get the length of a string form it's holder, get the number from the memory slot one above it */
+        Number length = getN(myName2+1);
+        /* the following line does the exact same thing as the line above */
+        Number length2 = Slen(myName2);
+        printf("\nlength of myName2: %f or %f\n",length,length2);
+    })
+    
+    /* you can also create an autoreleasepool by using the 'startautoreleasepool' and 'endautoreleasepool' statements */
+    startautoreleasepool
+        holder s;
+        holder n;
+        s = defS("hello");
+        n = defN(15);
+        printMainStack();
+    endautoreleasepool
+    
+    /* you can nest autoreleasepools as well */
+    
+    autoreleasepool({
+        holder a = defN(1);
+        setN(a, 4);
+        addNumberToMainStack(123);
+        printf("stack 1:");
+        printMainStack();
+        
+        autoreleasepool({
+            /* nesting is available because it accesses a separate stack, and the memory doesn't interphere *//* up to 10 nested autoreleasepools */
+            holder b = defN(2);
+            /* to access seperate main stacks before they have ended, use the 'mainStack[stack#][memorySlot]' array (e.g. mainStack[2][7] accesses the eighth number in the third stack) */
+            setN(b, mainStack[0][1]);
+            printf("stack 2:");
+            printMainStack();
+        })
+        
+        addNumberToMainStack(12);
+        printf("stack 1:");
+        printMainStack();
+        
+        /* since i find that 0 is not a good null value, because it is used a lot, use customNULL (can be changed in the autoreleasepool.h file) which is default set to -123 */
+        holder nothing;
+        nothing = defN(customNULL);
+        /* the following line does the same thing */
+        holder nothing2;
+        nothing2 = blank;
+    })
